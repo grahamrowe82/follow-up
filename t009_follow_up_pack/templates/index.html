@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>T-009 — Follow-Up Pack</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f6f8fa;
+        --card: #ffffff;
+        --border: #d0d7de;
+        --accent: #0969da;
+        --text: #1f2328;
+        --muted: #57606a;
+        font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        margin: 0;
+        padding: 0;
+      }
+      header {
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
+        padding: 1.5rem;
+      }
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 4rem;
+      }
+      h1 {
+        margin: 0 0 0.25rem;
+        font-size: 1.75rem;
+      }
+      .note {
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+      form {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+      }
+      textarea {
+        width: 100%;
+        min-height: 220px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        padding: 0.75rem;
+        resize: vertical;
+        font-family: "Source Code Pro", monospace;
+        font-size: 0.95rem;
+      }
+      .actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1rem;
+      }
+      button.primary {
+        background: var(--accent);
+        border: none;
+        color: #fff;
+        border-radius: 999px;
+        padding: 0.65rem 1.6rem;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      button.primary:hover {
+        opacity: 0.9;
+      }
+      .limit, .error {
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+      }
+      .limit {
+        color: var(--muted);
+      }
+      .error {
+        color: #b3261e;
+        font-weight: 600;
+      }
+      section.card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+      }
+      .section-title {
+        margin-top: 0;
+        margin-bottom: 1rem;
+      }
+      pre.summary {
+        background: #0d1117;
+        color: #e6edf3;
+        border-radius: 10px;
+        padding: 1rem;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 0.95rem;
+      }
+      .copy-bar {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 0.75rem;
+      }
+      button.copy {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.35rem 0.85rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        background: transparent;
+      }
+      button.copy:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .owners {
+        display: grid;
+        gap: 1rem;
+      }
+      .owner {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1rem;
+      }
+      .owner h3 {
+        margin: 0 0 0.75rem;
+        font-size: 1.1rem;
+      }
+      .owner ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .owner li {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.35rem 0;
+        border-top: 1px solid var(--border);
+      }
+      .owner li:first-child {
+        border-top: none;
+      }
+      .owner .due {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .empty {
+        color: var(--muted);
+        font-style: italic;
+      }
+      ol.clarify {
+        padding-left: 1.25rem;
+      }
+      @media (max-width: 720px) {
+        .actions {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.75rem;
+        }
+        button.primary {
+          width: 100%;
+        }
+        .owner li {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>T-009 — Follow-Up Pack</h1>
+      <p class="note">Baseline slice. Don’t paste PII/regulated data.</p>
+    </header>
+    <main>
+      <form action="{{ url_for('build_pack') }}" method="post">
+        <label for="meeting_input" class="note">Paste transcript or T-008 JSON snapshot</label>
+        <textarea id="meeting_input" name="meeting_input" maxlength="{{ text_limit }}" placeholder="Transcript or JSON">{{ input_text }}</textarea>
+        <div class="actions">
+          <p class="limit">Text limit {{ text_limit }} chars (JSON {{ json_limit }} chars).</p>
+          <button class="primary" type="submit">Build follow-up pack</button>
+        </div>
+        {% if error %}
+          <p class="error">{{ error }}</p>
+        {% endif %}
+      </form>
+
+      {% set summary_text = result.summary if result else '—' %}
+      <section class="card">
+        <div class="copy-bar">
+          <button type="button" class="copy" data-copy-target="summary-block">Copy summary</button>
+        </div>
+        <h2 class="section-title">Send-ready summary block</h2>
+        <pre id="summary-block" class="summary">{{ summary_text }}</pre>
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">Owner-grouped action list</h2>
+        {% if result and result.grouped_items %}
+          <div class="owners">
+            {% for owner, items in result.grouped_items %}
+              <div class="owner">
+                <h3>{{ owner }}</h3>
+                {% if items %}
+                  <ul>
+                    {% for item in items %}
+                      <li>
+                        <span class="action">{{ item.action or '—' }}</span>
+                        <span class="due">{{ item.due or '—' }}</span>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <p class="empty">—</p>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="empty">—</p>
+        {% endif %}
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">Clarify questions</h2>
+        {% if result and result.clarifies %}
+          <ol class="clarify">
+            {% for question in result.clarifies %}
+              <li>{{ question }}</li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          <p class="empty">—</p>
+        {% endif %}
+      </section>
+    </main>
+    <script>
+      const copyButtons = document.querySelectorAll('[data-copy-target]');
+      copyButtons.forEach((button) => {
+        button.addEventListener('click', async () => {
+          const targetId = button.getAttribute('data-copy-target');
+          const target = document.getElementById(targetId);
+          if (!target) {
+            return;
+          }
+          const text = target.innerText.trim();
+          try {
+            await navigator.clipboard.writeText(text);
+            button.textContent = 'Copied!';
+            setTimeout(() => {
+              button.textContent = 'Copy summary';
+            }, 1800);
+          } catch (err) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            button.textContent = 'Copied!';
+            setTimeout(() => {
+              button.textContent = 'Copy summary';
+            }, 1800);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
